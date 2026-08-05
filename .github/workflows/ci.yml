@@ -1,0 +1,43 @@
+name: parity
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  azazel:
+    name: azazel builds vaxis from source + runs a consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+      - name: Install CUE
+        run: |
+          CUE_VERSION=v0.11.1
+          curl -sL "https://github.com/cue-lang/cue/releases/download/${CUE_VERSION}/cue_${CUE_VERSION}_linux_amd64.tar.gz" -o /tmp/cue.tgz
+          sudo tar -xzf /tmp/cue.tgz -C /usr/local/bin cue
+          cue version
+      - name: Stage libvaxis source
+        run: ./azazel/fetch.sh
+      - name: Build vaxis + consumer via azazel (CUE model)
+        working-directory: azazel
+        run: |
+          sh gen_build_spec.sh
+          time zig build
+          ./zig-out/bin/consumer
+
+  zaza:
+    name: zaza consumes vaxis + runs a consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+      - name: Build + run the vaxis consumer via zaza (Zig build graph)
+        working-directory: zaza
+        run: |
+          time zig build run
