@@ -41,18 +41,14 @@ which means vaxis, zigimg, and the build-time uucode tables all compiled.
 
 ## Comparison
 
-| Build | What it does | Config size |
-|-------|--------------|-------------|
-| azazel | builds `vaxis` from source + a consumer; uucode `fields` as data | `project.cue`, 23 lines |
-| zaza | consumes `vaxis` via the Zig build graph, runs a consumer | `build.zig`,       28 lines |
-| upstream (native) | libvaxis's own full `zig build` | `build.zig`,      161 lines |
+Clean-cache builds with dependencies pre-fetched, Apple Silicon, fastest of two runs.
+`native` is the upstream's own `zig build`.
 
-### Organizational structure
+| Build | Clean build | Config |
+|-------|-------------|--------|
+| azazel | 6.7 s | `project.cue` — 23 lines · 768 B |
+| zaza | 6.5 s | `build.zig` — 28 lines · 1135 B |
+| native (the upstream's own `zig build`) | 7.7 s | — |
 
-- **azazel** states the whole target as data, including which uucode tables to
-  compile (the `fields` list). It builds the library from source.
-- **zaza** consumes the library as a Zig dependency. Its position is that pure
-  Zig is a first-class case handled by the standard Zig build graph, so there is
-  no separate DSL to learn for a Zig dependency.
+**Both build the vaxis library (and the uucode Unicode tables) faster than libvaxis builds itself.**
 
-See [`zaza/PROOF.md`](zaza/PROOF.md) for the command-for-command zaza proof.
